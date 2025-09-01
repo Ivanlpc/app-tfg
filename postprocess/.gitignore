@@ -5,8 +5,5 @@ _temp
 **/__pycache__/
 *.pyc
 tools/__pycache__/*
-reid/*
-reid/
-
-*.tar
-*.tar-60
+*.mp4
+demo_media/*
