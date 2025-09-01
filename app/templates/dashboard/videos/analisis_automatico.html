@@ -1,0 +1,472 @@
+{% extends "layout.html" %}
+
+{% block title %}Ver Análisis - {{ tarea }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/ver_video.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/player-cards.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/event-annotation.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/tiro-submenu.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/fase-partido.css') }}">
+<script src="{{ url_for('static', filename='js/popup.js') }}"></script>
+<style>
+  .canvas-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  #videoCanvas {
+    margin-top: 10px;
+    border: 2px solid #333;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    max-width: 100%;
+    height: auto;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h3 mb-0">Editor de tracking</h1>
+    <a href="/{{ username }}/video/{{ video.id }}" class="btn btn-outline-primary">
+      <!-- Si usas Bootstrap Icons: <i class="bi bi-arrow-left me-1"></i> -->
+      Volver
+    </a>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body">
+      <div class="text-center mb-3">
+        <canvas
+          id="videoCanvas"
+          width="640"
+          height="360"
+          class="img-fluid border shadow-sm"
+        ></canvas>
+      </div>
+
+      <div class="btn-toolbar justify-content-center gap-2 mb-3" role="toolbar" aria-label="Controles de reproducción">
+        <div class="btn-group me-2" role="group" aria-label="Reproducción">
+          <button id="playBtn" class="btn btn-success">
+            Play
+          </button>
+          <button id="pauseBtn" class="btn btn-danger">
+            Pausa
+          </button>
+          <button id="restartBtn" class="btn btn-outline-secondary">
+            ⏮ Reiniciar
+          </button>
+        </div>
+
+        <div class="btn-group me-2" role="group" aria-label="Fotogramas">
+          <button id="prevFrameBtn" class="btn btn-outline-secondary" >
+            ◀ Frame -1
+          </button>
+          <button id="nextFrameBtn" class="btn btn-outline-secondary" >
+            ▶ Frame +1
+          </button>
+        </div>
+
+        <div class="btn-group" role="group" aria-label="Segundos">
+          <button id="prevSecondBtn" class="btn btn-outline-secondary">⏪ -1s</button>
+          <button id="nextSecondBtn" class="btn btn-outline-secondary">⏩ +1s</button>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <button id="save" class="btn btn-primary btn-lg">
+          Guardar cambios
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% set liga_path = "liga_" + partido.liga.id|string if partido.liga else "sin_liga" %}
+
+<video id="video"
+  src="{{ url_for('video_routes.serve_video_files', username=username, temporada_id=partido.temporada.id, liga_path=liga_path, partido_id=partido.id, filename=video.filename) }}"
+  style="display:none" muted></video>
+
+<script>
+  var motTxt = {{ motTxt| tojson }};
+</script>
+<script>
+  const video = document.getElementById("video");
+  const canvas = document.getElementById("videoCanvas");
+  const ctx = canvas.getContext("2d");
+  const playBtn = document.getElementById("playBtn");
+  const pauseBtn = document.getElementById("pauseBtn");
+  const fps = {{ video.fps }};
+  const cambios = [];
+
+  let currentBoxes = []; // Guardar las cajas visibles del frame actual
+
+  // Reiniciar al primer frame
+  document.getElementById("restartBtn").addEventListener("click", () => {
+    video.pause();
+    video.currentTime = 0;
+  });
+
+  // Avanzar un frame
+  document.getElementById("nextFrameBtn").addEventListener("click", () => {
+    video.pause();
+    video.currentTime += 1 / fps;
+  });
+
+  // Retroceder un frame
+  document.getElementById("prevFrameBtn").addEventListener("click", () => {
+    video.pause();
+    video.currentTime = Math.max(0, video.currentTime - 1 / fps);
+  });
+
+  // Avanzar 1 segundo (30 frames)
+  document.getElementById("nextSecondBtn").addEventListener("click", () => {
+    video.pause();
+    video.currentTime = Math.min(video.duration, video.currentTime + 1);
+  });
+
+  // Retroceder 1 segundo (30 frames)
+  document.getElementById("prevSecondBtn").addEventListener("click", () => {
+    video.pause();
+    video.currentTime = Math.max(0, video.currentTime - 1);
+  });
+
+  document.getElementById("save").addEventListener("click", confirmUpdateMot);
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const currentFrame = Math.floor(video.currentTime * fps);
+    const boxes = motTxt[currentFrame] || [];
+
+    const scaleX = canvas.width / video.videoWidth;
+    const scaleY = canvas.height / video.videoHeight;
+
+    currentBoxes = []; // reset
+
+    boxes.forEach((lineStr) => {
+      const [frame, id, x, y, w, h] = lineStr.split(",").map(Number);
+
+      // Escalar coordenadas
+      const sx = x * scaleX;
+      const sy = y * scaleY;
+      const sw = w * scaleX;
+      const sh = h * scaleY;
+
+      ctx.strokeStyle = "lime";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(sx, sy, sw, sh);
+
+      ctx.fillStyle = "lime";
+      ctx.font = "16px Arial";
+      ctx.fillText(`ID: ${id}`, sx, sy - 5);
+
+      // Guardar box para detección de click
+      currentBoxes.push({ frame, id, x: sx, y: sy, w: sw, h: sh });
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  var popupActivo = null;
+  function showPopup(box) {
+    if (popupActivo) popupActivo.closePopup();
+
+    const html = `
+      <div class="popup-content">
+        <h2>Editar ID del jugador</h2>
+        <p>Frame: ${box.frame}</p>
+        <p>ID actual: <strong>${box.id}</strong></p>
+        <input type="number" id="newIdInput" value="${box.id}" />
+        <button id="confirmEdit" class="btn btn-primary">Confirmar</button>
+        <button id="cancelEdit" class="btn btn-secondary">Cancelar</button>
+      </div>
+    `;
+
+    popupActivo = new Popup(html, {
+      width: 'min(95%, 400px)',
+      height: 'auto',
+      backgroundColor: 'white',
+      closeButton: true,
+      overlay: true,
+      element: document.body
+    });
+
+    setTimeout(() => {
+      document.getElementById("confirmEdit").addEventListener("click", () => {
+        const newId = document.getElementById("newIdInput").value;
+        updateIdsFromFrame(box.frame, box.id, newId);
+        popupActivo.closePopup();
+      });
+
+      document.getElementById("cancelEdit").addEventListener("click", () => {
+        popupActivo.closePopup();
+      });
+    }, 50);
+  }
+
+  function updateIdsFromFrame(startFrame, oldId, newId) {
+    cambios.push({ startFrame, oldId, newId });
+    for (let frame = startFrame; frame <= Object.keys(motTxt).length; frame++) {
+      if (!motTxt[frame]) continue;
+      motTxt[frame] = motTxt[frame].map(line => {
+        const parts = line.split(",");
+        if (Number(parts[1]) === Number(oldId)) {
+          parts[1] = newId;
+          return parts.join(",");
+        }
+        return line;
+      });
+    }
+  }
+
+  function getCanvasCoords(e) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.clientX || e.touches[0].clientX;
+    const clientY = e.clientY || e.touches[0].clientY;
+
+    const x = (clientX - rect.left) * (canvas.width / rect.width);
+    const y = (clientY - rect.top) * (canvas.height / rect.height);
+
+    return { x, y };
+  }
+
+
+
+  canvas.addEventListener("click", (e) => {
+    const { x: mouseX, y: mouseY } = getCanvasCoords(e);
+    console.log(`Mouse position: (${mouseX}, ${mouseY})`);
+
+    for (let box of currentBoxes) {
+      if (
+        mouseX >= box.x &&
+        mouseX <= box.x + box.w &&
+        mouseY >= box.y &&
+        mouseY <= box.y + box.h
+      ) {
+        console.log("Box clicked:", box);
+        console.log(motTxt[box.frame]);
+        const realBox = motTxt[box.frame].find(b => parseInt(b.split(",")[1]) === parseInt(box.id));
+        editBox(realBox);
+        video.pause();
+        return;
+      }
+    }
+    console.log("No se hizo clic en ninguna caja.");
+  });
+  canvas.addEventListener("touchstart", (e) => {
+    const { x: mouseX, y: mouseY } = getCanvasCoords(e);
+    console.log(`Touch position: (${mouseX}, ${mouseY})`);
+
+    for (let box of currentBoxes) {
+      if (
+        mouseX >= box.x &&
+        mouseX <= box.x + box.w &&
+        mouseY >= box.y &&
+        mouseY <= box.y + box.h
+      ) {
+        const realBox = motTxt[box.frame].find(b => b.id === box.id);
+        console.log("Real box found:", realBox);
+        editBox(realBox);
+        video.pause();
+        return;
+      }
+    }
+  });
+
+
+  playBtn.addEventListener("click", () => video.play());
+  pauseBtn.addEventListener("click", () => video.pause());
+
+  draw();
+  playBtn.click();
+
+  function editBox(box) {
+    boxJson = box.split(',')
+    boxObj = {
+      frame: boxJson[0],
+      id: boxJson[1],
+      x: boxJson[2],
+      y: boxJson[3],
+      w: boxJson[4],
+      h: boxJson[5]
+    }
+    const html = `
+      <div class="popup-content w-100 p-4 bg-white shadow-lg rounded">
+        <h2 class="text-center mb-4">Editar track</h2>
+        <p class="text-muted">Frame: ${boxObj.frame}</p>
+        <div class="mb-3">
+          <label for="newIdInput" class="form-label">ID:</label>
+          <input type="number" id="newIdInput" value="${boxObj.id}" class="form-control" />
+        </div>
+        <div class="d-flex justify-content-between mb-3">
+          <div class="flex-fill me-2">
+            <label for="xInput" class="form-label">X:</label>
+            <input type="number" id="xInput" value="${boxObj.x}" class="form-control" />
+          </div>
+          <div class="flex-fill ms-2">
+            <label for="yInput" class="form-label">Y:</label>
+            <input type="number" id="yInput" value="${boxObj.y}" class="form-control" />
+          </div>
+        </div>
+        <div class="d-flex justify-content-between mb-3">
+          <div class="flex-fill me-2">
+            <label for="wInput" class="form-label">Width:</label>
+            <input type="number" id="wInput" value="${boxObj.w}" class="form-control" />
+          </div>
+          <div class="flex-fill ms-2">
+            <label for="hInput" class="form-label">Height:</label>
+            <input type="number" id="hInput" value="${boxObj.h}" class="form-control" />
+          </div>
+        </div>
+        <div class="d-flex justify-content-between mt-4">
+          <button id="confirmEdit" class="btn btn-primary w-48">Confirmar</button>
+          <button id="deleteBox" class="btn btn-danger w-48">Eliminar</button>
+          <button id="cancelEdit" class="btn btn-secondary w-48">Cancelar</button>
+        </div>
+      </div>
+    `;
+
+    const popupActivo = new Popup(html, {
+      width: 'min(95%, 700px)',
+      height: 'auto',
+      backgroundColor: 'white',
+      closeButton: true,
+      overlay: true,
+      element: document.body
+    });
+
+    setTimeout(() => {
+      document.getElementById("confirmEdit").addEventListener("click", () => {
+        const newId = document.getElementById("newIdInput").value;
+        const newX = document.getElementById("xInput").value;
+        const newY = document.getElementById("yInput").value;
+        const newW = document.getElementById("wInput").value;
+        const newH = document.getElementById("hInput").value;
+        const newBox = {
+          id: boxObj.id,
+          x: newX,
+          y: newY,
+          w: newW,
+          h: newH,
+          frame: boxObj.frame,
+          newId: newId
+        };
+
+        updateBox(boxObj, newBox);
+
+        popupActivo.closePopup();
+      });
+      document.getElementById("deleteBox").addEventListener("click", () => {
+        deleteBox(boxObj);
+        popupActivo.closePopup();
+      });
+
+      document.getElementById("cancelEdit").addEventListener("click", () => {
+        popupActivo.closePopup();
+      });
+    }, 50);
+  }
+
+  function deleteBox(box) {
+    for (const frame of Object.keys(motTxt)) {
+      console.log(`Checking frame ${frame} for box ${box.frame}`);
+      if (parseInt(frame) < parseInt(box.frame)) continue;
+      const index = motTxt[frame].findIndex(b => parseInt(b.split(',')[1]) === parseInt(box.id));
+      if (index !== -1) {
+        motTxt[frame].splice(index, 1);
+        console.log(`Box deleted: ${box.id} from frame ${frame}`);
+      }
+    }
+  }
+
+  function updateBox(oldBox, newBox) {
+    const intFrame = parseInt(oldBox.frame);
+    const index = motTxt[intFrame].findIndex(box => parseInt(box.split(',')[1]) === parseInt(oldBox.id));
+    if (index !== -1) {
+      motTxt[intFrame][index] = `${intFrame},${newBox.newId},${newBox.x},${newBox.y},${newBox.w},${newBox.h},-1,-1,-1`;
+      if (oldBox.id !== newBox.newId) {
+        for (const frame of Object.keys(motTxt)) {
+          if (parseInt(frame) < parseInt(intFrame)) continue;
+          const index = motTxt[frame].findIndex(b => parseInt(b.split(',')[1]) === parseInt(oldBox.id));
+          if (index !== -1) {
+            const actualData = motTxt[frame][index].split(',');
+            motTxt[frame][index] = `${frame},${newBox.newId},${actualData[2]},${actualData[3]},${actualData[4]},${actualData[5]},-1,-1,-1`;
+            console.log(`Box ID updated: ${oldBox.id} to ${newBox.newId} in frame ${frame}`)
+          }
+        }
+      }
+    }
+    draw();
+  }
+
+
+  var popupActivo = null;
+  function confirmUpdateMot() {
+    const html = `
+      <div class="popup-content">
+        <h2>Guardar cambios</h2>
+        <p>¿Estás seguro de que quieres guardar los cambios en este análisis?</p>
+        <p>No podrás obtener de nuevo las predicciones anteriores.</p>
+        <button id="confirm-save" class="btn btn-success" onclick="updateMOTBox()">Guardar</button>
+        <button id="cancel-save" class="btn btn-secondary" onclick="popupActivo.closePopup()">Cancelar</button>
+      </div>
+    `;
+    popupActivo = new Popup(html, {
+      width: 'min(95%, 700px)',
+      height: 'auto',
+      backgroundColor: 'white',
+      closeButton: true,
+      overlay: true,
+      element: document.body
+    });
+  }
+
+  function motTxtToArray(motTxt) {
+    let lines = [];
+
+    Object.keys(motTxt)
+      .sort((a, b) => parseInt(a) - parseInt(b))
+      .forEach(frame => {
+        motTxt[frame].forEach(line => {
+          lines.push(line);
+        });
+      });
+
+    return lines;
+  }
+
+
+  function updateMOTBox() {
+    const motArr = motTxtToArray(motTxt);
+    fetch(`/video/analisis-automatico/{{analisis}}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8"
+      },
+      body: motArr.join('\n')
+    })
+      .then((res) => res.json())
+      .then((response) => {
+        if (response.success) {
+          popupActivo.closePopup();
+          window.location.href = `/{{username}}/video/{{video.id}}`;
+        } else {
+          alert("Error al actualizar el análisis: " + response.error);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        alert("Error al comunicarse con el servidor: " + err);
+      });
+  }
+
+
+</script>
+{% endblock %}
