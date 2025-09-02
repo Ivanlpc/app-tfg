@@ -418,3 +418,15 @@ class Descarga(db.Model):
     user = relationship('User')
 
     __table_args__ = (UniqueConstraint('tarea_id', name='_unique_tarea'),)
+
+# ---------------------------
+# Tabla de jugadores en un tracking
+# ---------------------------
+
+class JugadorTracking(db.Model):
+    __tablename__ = 'jugadores_tracking'
+
+    tarea_id = db.Column(db.Integer, db.ForeignKey('tareas.id', ondelete="CASCADE"), primary_key=True)
+    jugador_id = db.Column(db.Integer, db.ForeignKey('jugadores.id', ondelete="CASCADE"), primary_key=True)
+    id = db.Column(db.Integer)
+
