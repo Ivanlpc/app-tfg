@@ -22,7 +22,6 @@ env/
 *.tmp
 *.swp
 
-*.pth
 YOLOX_outputs/
 .vscode
 demo_media/

@@ -684,7 +684,7 @@ def cancelar_tarea(tarea_id):
     return jsonify({'success': True, 'message': 'Tarea cancelada con éxito'})
 
 
-@video_routes.route('/<username>/tareas/<int:tarea_id>', methods=['GET'])
+@video_routes.route('/<username>/analisis-automatico/<int:tarea_id>/mot', methods=['GET'])
 def ver_resultados_analisis(username, tarea_id):
     """
     Muestra los resultados del análisis automático de un video.
@@ -722,16 +722,10 @@ def ver_resultados_analisis(username, tarea_id):
             indexedByFrame[frame_id] = []
         indexedByFrame[frame_id].append(line)
 
-    return render_template(
-        "dashboard/videos/analisis_automatico.html",
-        tarea=tarea,
-        username=session.get('username'),
-        video=video,
-        temporada=temporada,
-        partido=partido,
-        analisis=tarea.id,
-        motTxt=indexedByFrame
-    )
+    return jsonify({
+        'motTxt': indexedByFrame,
+        'fps': video.fps
+    })
 
 
 def aplicar_cambios_mot(mot_path, cambios):

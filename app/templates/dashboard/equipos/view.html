@@ -3,6 +3,8 @@
 {% block title %}{{ equipo.nombre }} - MIKEL{% endblock %}
 
 {% block content %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 <div class="module-header">
     <div>
         <h1>{{ equipo.nombre }}</h1>
@@ -59,7 +61,7 @@
 <div class="dashboard-section">
     <div class="section-header">
         <h3 class="section-title"><i class="fas fa-user-friends"></i> Jugadores</h3>
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#nuevoJugadorModal">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoJugadorModal">
             <i class="fas fa-plus"></i> Nuevo Jugador
         </button>
     </div>
@@ -133,7 +135,7 @@
             <i class="fas fa-user-friends"></i>
             <h3>No hay jugadores</h3>
             <p>Comienza añadiendo jugadores a tu equipo</p>
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#nuevoJugadorModal">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoJugadorModal">
                 <i class="fas fa-plus"></i> Nuevo Jugador
             </button>
         </div>
