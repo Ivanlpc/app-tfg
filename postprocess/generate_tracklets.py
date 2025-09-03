@@ -159,7 +159,7 @@ def main(data_path, pred_dir):
 
 
 
-def lanzar_analisis(tareaid):
+def lanzar_analisis(tareaid, params):
     global TAREA_ID
     TAREA_ID = tareaid
     try:
@@ -170,12 +170,11 @@ def lanzar_analisis(tareaid):
         tracklets = main(f"{Config.UPLOAD_FOLDER}/data/{tareaid}", mot_path)
         if os.path.exists(f"{Config.UPLOAD_FOLDER}/data/{tareaid}"):
             shutil.rmtree(f"{Config.UPLOAD_FOLDER}/data/{tareaid}")
-        print(tracklets)
         if tracklets is not None:
             output_path = os.path.join(Config.UPLOAD_FOLDER, path[0], f"temporada_{path[1]}", f"liga_{path[2]}", f"partido_{path[3]}", f"{path[4].replace('.mp4',f'_{tareaid}_mot.txt')}")
             if os.path.exists(output_path):
                 os.remove(output_path)
-            refine(tracklets, output_path)
+            refine(tracklets, output_path, params)
             actualizar_porcentaje(tareaid, 100)
             actualizar_estado(tareaid, 1)
             actualizar_fecha_fin(tareaid)

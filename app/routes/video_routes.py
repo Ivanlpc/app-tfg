@@ -573,24 +573,21 @@ def analisis_automatico(video_id):
             estado=0,  # Estado 0: En progreso
             progreso=0.0,
         )
-        postprocesado = request.form.get('postprocesado')
         db.session.add(nueva_tarea)
         db.session.commit()
         from config import Config
+        data = request.get_json()
+        print(nueva_tarea)
         req = requests.post(
             f'{Config.MODEL_URL}/analizar',
             json={
+                **data,
                 'id_tarea': nueva_tarea.id,
-                'postprocess': postprocesado
             }
         )
         if req.status_code != 202:
             db.session.rollback()
             return jsonify({'error': 'Error al iniciar el análisis automático'}), 500
-        # Actualizar la tarea con el ID del proceso
-        nueva_tarea.proceso_id = req.json().get('proceso_id')
-        db.session.commit()
-
         print(
             f"Tarea de análisis automático creada para el video {video_id} del partido {partido.id}")
         print(
@@ -841,9 +838,14 @@ def renderizar_analisis(analisis_id):
         print(f"Ruta de MOT: {file_path}")
         print(f"Ruta de salida: {output_path}")
         print(f"Blur: {blur}")
-
+        jugadores_track = JugadorTracking.query.filter_by(tarea_id = tarea.id).all()
+        datos_jugadores = {}
+        for jugador_track in jugadores_track:
+            jugadorObj = Jugador.query.get(jugador_track.jugador_id)
+            if jugadorObj:
+                datos_jugadores[jugador_track.id] = jugadorObj.nombre
         thread = Thread(target=render_video_with_boxes, args=(os.path.join(
-            partido_folder, video.filename), file_path, output_path, nueva_descarga.id, blur))
+            partido_folder, video.filename), file_path, output_path, nueva_descarga.id, blur, datos_jugadores))
         thread.start()
 
         return jsonify({
@@ -903,6 +905,10 @@ def eliminar_render(descarga_id):
         return jsonify({'error': 'No autorizado'}), 401
     try:
         descarga = Descarga.query.get_or_404(descarga_id)
+        if descarga.estado == 3:
+            db.session.delete(descarga)
+            db.session.commit()
+            return jsonify({'success': True, 'message': 'Render eliminado'}), 200
         if descarga.estado != 1:
             return jsonify({'error': 'El renderizado no está completo'}), 400
         tarea = Tarea.query.get_or_404(descarga.tarea_id)

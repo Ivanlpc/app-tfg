@@ -556,23 +556,23 @@ def save_results(sct_output_path, tracklets):
 #     return parser.parse_args()
 
 
-def get_default_args():
+def get_default_args(params):
     return argparse.Namespace(
         dataset="SportsMOT",
         tracker="DeepSORT",  
-        use_split=Config.USE_SPLIT,
-        min_len=Config.MIN_LEN,
-        eps=Config.EPS,
-        min_samples=Config.MIN_SAMPLES,
-        max_k=Config.MAX_K,
-        use_connect=Config.USE_CONNECT,
-        spatial_factor=Config.SPATIAL_FACTOR,
-        merge_dist_thres=Config.MERGE_DIST_THRESH
+        use_split=params.get("USE_SPLIT", Config.USE_SPLIT),
+        min_len=params.get("MIN_LEN", Config.MIN_LEN),
+        eps=params.get("EPS", Config.EPS),
+        min_samples=params.get("MIN_SAMPLES", Config.MIN_SAMPLES),
+        max_k=params.get("MAX_K", Config.MAX_K),
+        use_connect=params.get("USE_CONNECT", Config.USE_CONNECT),
+        spatial_factor=params.get("SPATIAL_FACTOR", Config.SPATIAL_FACTOR),
+        merge_dist_thres=params.get("MERGE_DIST_THRESH", Config.MERGE_DIST_THRESH)
     )
 
 
-def main(data_pkl, output_path):
-    args = get_default_args()
+def main(data_pkl, output_path, params):
+    args = get_default_args(params)
     seq_tracks_dir = data_pkl
     seqs_tracks = os.listdir(seq_tracks_dir)
     seqs_tracks.sort()

@@ -13,7 +13,15 @@ def postprocesado():
     try:
         params = request.get_json()
         campos_obligatorios = [
-            'tarea_id'
+            'tarea_id',
+            "USE_SPLIT",
+            "MIN_LEN",
+            "EPS",
+            "MIN_SAMPLES",
+            "MAX_K",
+            "USE_CONNECT",
+            "SPATIAL_FACTOR",
+            "MERGE_DIST_THRESH"
         ]
         for campo in campos_obligatorios:
             if campo not in params:
@@ -22,6 +30,7 @@ def postprocesado():
 
         thread = Thread(target=lanzar_analisis, args=(
             params['tarea_id'],
+            params
         ))
         thread.start()
 

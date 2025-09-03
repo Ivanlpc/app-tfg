@@ -9,7 +9,7 @@ engine = create_engine(Config.SQLALCHEMY_DATABASE_URI)
 Session = sessionmaker(bind=engine)
 
 
-def render_video_with_boxes(input_video, mot_file, output_video, descarga_id, blur_faces=False):
+def render_video_with_boxes(input_video, mot_file, output_video, descarga_id, blur_faces=False, jugadoresTracking = {}):
     session = Session()
     try:
     # Verificar que el archivo MOT existe
@@ -63,7 +63,12 @@ def render_video_with_boxes(input_video, mot_file, output_video, descarga_id, bl
 
                     # Dibujar caja y texto
                     cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
-                    cv2.putText(frame, f"ID: {track_id} ({confidence:.2f})", 
+                    if jugadoresTracking.get(int(track_id)):
+                        cv2.putText(frame, str(jugadoresTracking.get(int(track_id))), 
+                                (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, 
+                                (0, 255, 0), 2)
+                    else:
+                        cv2.putText(frame, f"ID: {track_id} ({confidence:.2f})", 
                                 (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, 
                                 (0, 255, 0), 2)
 

@@ -449,14 +449,14 @@
                     </button>
                     {% if descarga %}
                     {% if descarga.estado == 1 %}
-                    <div class="btn-group gap-0">
-                      <button type="button" class="btn btn-secondary btn-sm" onclick="downloadRender('{{ tarea.id }}')">
+                    <div class="d-flex justify-content-start">
+                      <button type="button" class="btn btn-secondary btn-sm rounded-0" onclick="downloadRender('{{ tarea.id }}')">
                         <i class="fas fa-download"></i> Descargar
                       </button>
 
-                      <button type="button" class="btn btn-secondary btn-sm dropdown-toggle dropdown-toggle-split"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <span class="visually-hidden">Toggle Dropdown</span>
+                      <button type="button" class="btn btn-secondary btn-sm dropdown-toggle dropdown-toggle-split rounded-0"
+                        data-toggle="dropdown" aria-expanded="false">
+                        <span class="hidden">Toggle Dropdown</span>
                       </button>
 
                       <ul class="dropdown-menu">
@@ -852,15 +852,19 @@
   playBtn.addEventListener("click", () => video.play());
   pauseBtn.addEventListener("click", () => video.pause());
 
-  button.addEventListener("click", function () {
+button.addEventListener("click", function () {
   const html = `
-    <div class="popup-content" style="max-height:80vh; overflow-y:auto;">
+    <div class="popup-content w-100" style="max-height:80vh; overflow-y:auto;">
       <h2>Iniciar Análisis Automático</h2>
       <p>¿Quieres iniciar el análisis de este vídeo?</p>
       <p>Este proceso puede tardar un tiempo dependiendo de la duración del vídeo.</p>
 
       <fieldset style="margin:12px 0;padding:12px;border:1px solid #e5e7eb;border-radius:12px;">
-        <legend style="padding:0 6px;font-weight:600;">Hiperparámetros</legend>
+        <legend style="padding:0 6px;font-weight:600;">Hiperparámetros del modelo</legend>
+        <label for="modelo">Modelo</label>
+        <select id="modelo" class="mb-2 rounded">
+          <option value="deepeiou">Deep-EIoU</option>
+        </select>
         <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:center;">
           <label for="hp-TRACK_HIGH_THRESH">TRACK_HIGH_THRESH</label>
           <input id="hp-TRACK_HIGH_THRESH" type="number" step="0.01" min="0" max="1" value="0.6">
@@ -899,6 +903,35 @@
         Realizar postprocesado
       </label>
 
+      <fieldset id="pp-fieldset" style="margin:12px 0;padding:12px;border:1px solid #e5e7eb;border-radius:12px;opacity:.6;">
+        <legend style="padding:0 6px;font-weight:600;">Parámetros de postprocesado</legend>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:center;">
+          <label for="pp-USE_SPLIT">USE_SPLIT</label>
+          <input id="pp-USE_SPLIT" type="checkbox">
+
+          <label for="pp-MIN_LEN">MIN_LEN</label>
+          <input id="pp-MIN_LEN" type="number" step="1" min="0" value="100" disabled>
+
+          <label for="pp-EPS">EPS</label>
+          <input id="pp-EPS" type="number" step="0.01" min="0" value="0.7" disabled>
+
+          <label for="pp-MIN_SAMPLES">MIN_SAMPLES</label>
+          <input id="pp-MIN_SAMPLES" type="number" step="1" min="1" value="4" disabled>
+
+          <label for="pp-MAX_K">MAX_K</label>
+          <input id="pp-MAX_K" type="number" step="1" min="1" value="3" disabled>
+
+          <label for="pp-USE_CONNECT">USE_CONNECT</label>
+          <input id="pp-USE_CONNECT" type="checkbox" checked disabled>
+
+          <label for="pp-SPATIAL_FACTOR">SPATIAL_FACTOR</label>
+          <input id="pp-SPATIAL_FACTOR" type="number" step="0.01" min="0" value="1.0" disabled>
+
+          <label for="pp-MERGE_DIST_THRESH">MERGE_DIST_THRESH</label>
+          <input id="pp-MERGE_DIST_THRESH" type="number" step="0.01" min="0" value="0.4" disabled>
+        </div>
+      </fieldset>
+
       <div style="display:flex;gap:8px;margin-top:10px;">
         <button id="confirm-analysis" class="btn btn-primary">Confirmar</button>
         <button id="cancel-analysis" class="btn btn-secondary" onclick="popupActivo.closePopup()">Cancelar</button>
@@ -915,19 +948,33 @@
     element: document.body
   });
 
+  // Helpers
   const num = (id, def, {min=-Infinity, max=Infinity, integer=false}={}) => {
     const el = document.getElementById(id);
     let v = integer ? parseInt(el.value, 10) : parseFloat(el.value);
     if (Number.isNaN(v)) v = def;
     v = Math.max(min, Math.min(max, v));
-    el.value = integer ? String(v|0) : String(v); 
+    el.value = integer ? String(v|0) : String(v);
     return v;
   };
   const bool = (id) => document.getElementById(id).checked;
 
+  const ppToggle = document.getElementById("postprocess-checkbox");
+  const ppFieldset = document.getElementById("pp-fieldset");
+  const setPPEnabled = (enabled) => {
+    ppFieldset.style.opacity = enabled ? "1" : ".6";
+    ppFieldset.querySelectorAll("input").forEach((el) => {
+      el.disabled = !enabled;
+    });
+  };
+  setPPEnabled(false);
+  ppToggle.addEventListener("change", () => setPPEnabled(ppToggle.checked));
+
   document.getElementById("confirm-analysis").addEventListener("click", function () {
+    const postprocess = bool("postprocess-checkbox");
+
     const payload = {
-      postprocess: bool("postprocess-checkbox"),
+      modelo: document.getElementById("modelo").value,
       TRACK_HIGH_THRESH:    num("hp-TRACK_HIGH_THRESH", 0.6, {min:0, max:1}),
       TRACK_LOW_THRESH:     num("hp-TRACK_LOW_THRESH", 0.1, {min:0, max:1}),
       NEW_TRACK_THRESH:     num("hp-NEW_TRACK_THRESH", 0.7, {min:0, max:1}),
@@ -938,11 +985,27 @@
       NMS_THRES:            num("hp-NMS_THRES", 0.7, {min:0, max:1}),
       PROXIMITY_THRESH:     num("hp-PROXIMITY_THRESH", 0.5, {min:0, max:1}),
       APPEARANCE_THRESH:    num("hp-APPEARANCE_THRESH", 0.25, {min:0, max:1}),
+      postprocess
     };
+
+    if (postprocess) {
+      payload.postprocess_params = {
+        USE_SPLIT:          bool("pp-USE_SPLIT"),
+        MIN_LEN:            num("pp-MIN_LEN", 100, {min:0, integer:true}),
+        EPS:                num("pp-EPS", 0.7, {min:0}),
+        MIN_SAMPLES:        num("pp-MIN_SAMPLES", 4, {min:1, integer:true}),
+        MAX_K:              num("pp-MAX_K", 3, {min:1, integer:true}),
+        USE_CONNECT:        bool("pp-USE_CONNECT"),
+        SPATIAL_FACTOR:     num("pp-SPATIAL_FACTOR", 1.0, {min:0}),
+        MERGE_DIST_THRESH:  num("pp-MERGE_DIST_THRESH", 0.4, {min:0})
+      };
+    }
+
     startAnalysis(payload);
     popupActivo.closePopup();
   });
 });
+
 
 
 
@@ -1142,10 +1205,16 @@
   intervalos_tareas = [];
   intervalos_descargas = [];
   function startAnalysis(options) {
-    closeTracking();
-    $("#confirm-analysis").prop("disabled", true);
-    $("#cancel-analysis").prop("disabled", true);
-    $.post("/video/{{ video.id }}/analisis-automatico", { options }, function (response) {
+  closeTracking();
+  $("#confirm-analysis").prop("disabled", true);
+  $("#cancel-analysis").prop("disabled", true);
+
+  $.ajax({
+    url: "/video/{{ video.id }}/analisis-automatico",
+    type: "POST",
+    contentType: "application/json",
+    data: JSON.stringify(options),
+    success: function (response) {
       if (response.success) {
         popupActivo.closePopup();
         popupActivo = new Popup(`
@@ -1191,13 +1260,14 @@
           element: document.body
         });
       }
-    }).fail(function (err) {
+    },
+    error: function (err) {
       console.log(err);
       popupActivo.closePopup();
       popupActivo = new Popup(`
         <div class="popup-content">
           <h2>Error al iniciar análisis</h2>
-          <p>${err.responseJSON.error}</p>
+          <p>${err.responseJSON ? err.responseJSON.error : "Error inesperado"}</p>
         </div>
       `, {
         width: 'min(95%, 700px)',
@@ -1207,8 +1277,10 @@
         overlay: true,
         element: document.body
       });
-    });
-  }
+    }
+  });
+}
+
 
   function getCanvasCoords(e) {
     const rect = canvas.getBoundingClientRect();
@@ -1716,13 +1788,13 @@ $('#cancelarBtn').addEventListener('click', () => {
                     <button class="btn btn-primary btn-sm me-2 tracking-button" onclick="viewAnalysisResults('${taskid}')">
                       <i class="fas fa-eye"></i> Ver resultados
                     </button>
-                    <div class="btn-group gap-0">
+                    <div class="btn-group" style="gap: 0 !important;">
                   <button type="button" class="btn btn-secondary btn-sm" onclick="downloadRender('${renderId}')">
                     <i class="fas fa-download"></i> Descargar
                   </button>
 
-                  <button type="button" class="btn btn-secondary btn-sm dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-                    <span class="visually-hidden">Toggle Dropdown</span>
+                  <button type="button" class="btn btn-secondary btn-sm dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-expanded="false">
+                    <span class="hidden">Toggle Dropdown</span>
                   </button>
 
                   <ul class="dropdown-menu ">
@@ -1751,11 +1823,32 @@ $('#cancelarBtn').addEventListener('click', () => {
                     <button class="btn btn-primary btn-sm me-2 tracking-button" onclick="viewAnalysisResults('${taskid}')">
                       <i class="fas fa-eye"></i> Ver resultados
                     </button>
-                    <button class="btn btn-danger btn-sm" disabled onclick="() => {}">
+                    <div class="d-flex justify-content-start">
+                      <button class="btn btn-danger btn-sm" disabled onclick="() => {}">
                       <i class="fas fa-download"></i> Error al renderizar
                     </button>
+
+                      <button type="button" class="btn btn-danger btn-sm dropdown-toggle dropdown-toggle-split rounded-0"
+                        data-toggle="dropdown" aria-expanded="false">
+                        <span class="hidden">Toggle Dropdown</span>
+                      </button>
+
+                      <ul class="dropdown-menu">
+                        <li><button class="dropdown-item text-danger"
+                            onclick="deleteRender('${renderId}', '${taskid}')">Eliminar</button></li>
+                      </ul>
+                    </div>
+                    
+
                     </div>
               `;
+              intervalos_descargas = intervalos_descargas.filter(i => {
+          if (i.id === renderId) {
+            clearInterval(i.interval);
+            return false;
+          }
+          return true;
+        });
         }
       })
       .catch(err => console.error("Error actualizando tarea:", err));
@@ -1883,7 +1976,7 @@ $('#cancelarBtn').addEventListener('click', () => {
           overlay: true,
           element: document.body
         });
-        const row = document.querySelector(`tr[data-analysis-id]`);
+        const row = document.querySelector(`tr[data-analysis-id="${taskid}"]`);
         if (row) {
           const actionsCell = row.querySelector("td:nth-child(4)");
           if (actionsCell) {

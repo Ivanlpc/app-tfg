@@ -27,6 +27,7 @@ import mysql.connector
 IMAGE_EXT = [".jpg", ".jpeg", ".webp", ".bmp", ".png"]
 ID_TAREA = None
 POSTPROCESADO = True
+MODEL_PARAMS = None
 
 conn = mysql.connector.connect(
         host=Config.MYSQL_HOST,
@@ -224,6 +225,7 @@ def imageflow_demo(predictor, extractor, vis_folder, current_time, args):
 
 def postprocess_video():
     req = requests.post(Config.POSTPROCESS_URL, json={
+        **MODEL_PARAMS['postprocess_params'],
         'tarea_id': ID_TAREA,
     })
     if req.status_code == 202:
@@ -309,7 +311,7 @@ def obtener_nombre_mot(tarea_id):
     cursor.close()
     return result
 
-def lanzar_analisis(postprocessado, id_tarea=None ):
+def lanzar_analisis(params, id_tarea ):
     data = obtener_nombre_mot(id_tarea)
     path_video = os.path.join(Config.UPLOAD_FOLDER, data[0], f"temporada_{data[1]}", f"liga_{data[2]}", f"partido_{data[3]}", data[4])
     args = Namespace(
@@ -327,23 +329,25 @@ def lanzar_analisis(postprocessado, id_tarea=None ):
         fp16=False,
         fuse=False,
         trt=False,
-        track_high_thresh=Config.TRACK_HIGH_THRESH,
-        track_low_thresh=Config.TRACK_LOW_THRESH,
-        new_track_thresh=Config.NEW_TRACK_THRESH,
-        track_buffer=Config.TRACK_BUFFER,
-        match_thresh=Config.MATCH_THRESH,
-        aspect_ratio_thresh=Config.ASPECT_RATIO_THRESH,
-        min_box_area=Config.MIN_BOX_AREA,
-        nms_thres=Config.NMS_THRES,
+        track_high_thresh=params.get("TRACK_HIGH_THRESH", Config.TRACK_HIGH_THRESH),
+        track_low_thresh=params.get("TRACK_LOW_THRESH", Config.TRACK_LOW_THRESH),
+        new_track_thresh=params.get("NEW_TRACK_THRESH", Config.NEW_TRACK_THRESH),
+        track_buffer=params.get("TRACK_BUFFER", Config.TRACK_BUFFER),
+        match_thresh=params.get("MATCH_THRESH", Config.MATCH_THRESH),
+        aspect_ratio_thresh=params.get("ASPECT_RATIO_THRESH", Config.ASPECT_RATIO_THRESH),
+        min_box_area=params.get("MIN_BOX_AREA", Config.MIN_BOX_AREA),
+        nms_thres=params.get("NMS_THRES", Config.NMS_THRES),
         mot20=Config.MOT20,
         with_reid=Config.WITH_REID,
-        proximity_thresh=Config.PROXIMITY_THRESH,
-        appearance_thresh=Config.APPEARANCE_THRESH
+        proximity_thresh=params.get("PROXIMITY_THRESH", Config.PROXIMITY_THRESH),
+        appearance_thresh=params.get("APPEARANCE_THRESH", Config.APPEARANCE_THRESH)
     )
     global ID_TAREA
-    ID_TAREA = id_tarea
     global POSTPROCESADO
-    POSTPROCESADO = postprocessado
+    global MODEL_PARAMS
+    ID_TAREA = id_tarea
+    POSTPROCESADO = params.get("postprocess", False)
+    MODEL_PARAMS = params
     print(f"ID_TAREA: {ID_TAREA}")
     print(f"args: {args}")
     try:
