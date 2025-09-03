@@ -804,6 +804,7 @@
   const exitBtn = document.getElementById("exitBtn");
   var fps = 30;
   var motTxt = {};
+  var jugadores_tracking = {};
   var trackingActual = null;
   var popupActivo = null;
   let currentBoxes = [];
@@ -852,38 +853,97 @@
   pauseBtn.addEventListener("click", () => video.pause());
 
   button.addEventListener("click", function () {
-    html = `
-      <div class="popup-content">
-        <h2>Iniciar Análisis Automático</h2>
-        <p>¿Quieres iniciar el análisis de este vídeo?</p>
-        <p>Este proceso puede tardar un tiempo dependiendo de la duración del vídeo.</p>
+  const html = `
+    <div class="popup-content" style="max-height:80vh; overflow-y:auto;">
+      <h2>Iniciar Análisis Automático</h2>
+      <p>¿Quieres iniciar el análisis de este vídeo?</p>
+      <p>Este proceso puede tardar un tiempo dependiendo de la duración del vídeo.</p>
 
-        <label>
-          <input type="checkbox" id="postprocess-checkbox">
-          Realizar postprocesado
-        </label>
-        <br><br>
+      <fieldset style="margin:12px 0;padding:12px;border:1px solid #e5e7eb;border-radius:12px;">
+        <legend style="padding:0 6px;font-weight:600;">Hiperparámetros</legend>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:center;">
+          <label for="hp-TRACK_HIGH_THRESH">TRACK_HIGH_THRESH</label>
+          <input id="hp-TRACK_HIGH_THRESH" type="number" step="0.01" min="0" max="1" value="0.6">
+
+          <label for="hp-TRACK_LOW_THRESH">TRACK_LOW_THRESH</label>
+          <input id="hp-TRACK_LOW_THRESH" type="number" step="0.01" min="0" max="1" value="0.1">
+
+          <label for="hp-NEW_TRACK_THRESH">NEW_TRACK_THRESH</label>
+          <input id="hp-NEW_TRACK_THRESH" type="number" step="0.01" min="0" max="1" value="0.7">
+
+          <label for="hp-TRACK_BUFFER">TRACK_BUFFER</label>
+          <input id="hp-TRACK_BUFFER" type="number" step="1" min="0" value="60">
+
+          <label for="hp-MATCH_THRESH">MATCH_THRESH</label>
+          <input id="hp-MATCH_THRESH" type="number" step="0.01" min="0" max="1" value="0.8">
+
+          <label for="hp-ASPECT_RATIO_THRESH">ASPECT_RATIO_THRESH</label>
+          <input id="hp-ASPECT_RATIO_THRESH" type="number" step="0.01" min="0" value="1.6">
+
+          <label for="hp-MIN_BOX_AREA">MIN_BOX_AREA</label>
+          <input id="hp-MIN_BOX_AREA" type="number" step="1" min="0" value="10">
+
+          <label for="hp-NMS_THRES">NMS_THRES</label>
+          <input id="hp-NMS_THRES" type="number" step="0.01" min="0" max="1" value="0.7">
+
+          <label for="hp-PROXIMITY_THRESH">PROXIMITY_THRESH</label>
+          <input id="hp-PROXIMITY_THRESH" type="number" step="0.01" min="0" max="1" value="0.5">
+
+          <label for="hp-APPEARANCE_THRESH">APPEARANCE_THRESH</label>
+          <input id="hp-APPEARANCE_THRESH" type="number" step="0.01" min="0" max="1" value="0.25">
+        </div>
+      </fieldset>
+
+      <label style="display:flex;gap:8px;align-items:center;margin:8px 0;">
+        <input type="checkbox" id="postprocess-checkbox">
+        Realizar postprocesado
+      </label>
+
+      <div style="display:flex;gap:8px;margin-top:10px;">
         <button id="confirm-analysis" class="btn btn-primary">Confirmar</button>
         <button id="cancel-analysis" class="btn btn-secondary" onclick="popupActivo.closePopup()">Cancelar</button>
       </div>
-    `;
+    </div>
+  `;
 
-    popupActivo = new Popup(html, {
-      width: 'min(95%, 700px)',
-      height: 'auto',
-      backgroundColor: 'white',
-      closeButton: true,
-      overlay: true,
-      element: document.body
-    });
-
-    // Añadimos el event listener al botón confirm
-    document.getElementById("confirm-analysis").addEventListener("click", function () {
-      const postprocess = document.getElementById("postprocess-checkbox").checked;
-      startAnalysis(postprocess ? 1 : 0);
-      popupActivo.closePopup();
-    });
+  popupActivo = new Popup(html, {
+    width: 'min(95%, 700px)',
+    height: 'auto',
+    backgroundColor: 'white',
+    closeButton: true,
+    overlay: true,
+    element: document.body
   });
+
+  const num = (id, def, {min=-Infinity, max=Infinity, integer=false}={}) => {
+    const el = document.getElementById(id);
+    let v = integer ? parseInt(el.value, 10) : parseFloat(el.value);
+    if (Number.isNaN(v)) v = def;
+    v = Math.max(min, Math.min(max, v));
+    el.value = integer ? String(v|0) : String(v); 
+    return v;
+  };
+  const bool = (id) => document.getElementById(id).checked;
+
+  document.getElementById("confirm-analysis").addEventListener("click", function () {
+    const payload = {
+      postprocess: bool("postprocess-checkbox"),
+      TRACK_HIGH_THRESH:    num("hp-TRACK_HIGH_THRESH", 0.6, {min:0, max:1}),
+      TRACK_LOW_THRESH:     num("hp-TRACK_LOW_THRESH", 0.1, {min:0, max:1}),
+      NEW_TRACK_THRESH:     num("hp-NEW_TRACK_THRESH", 0.7, {min:0, max:1}),
+      TRACK_BUFFER:         num("hp-TRACK_BUFFER", 60, {min:0, integer:true}),
+      MATCH_THRESH:         num("hp-MATCH_THRESH", 0.8, {min:0, max:1}),
+      ASPECT_RATIO_THRESH:  num("hp-ASPECT_RATIO_THRESH", 1.6, {min:0}),
+      MIN_BOX_AREA:         num("hp-MIN_BOX_AREA", 10, {min:0, integer:true}),
+      NMS_THRES:            num("hp-NMS_THRES", 0.7, {min:0, max:1}),
+      PROXIMITY_THRESH:     num("hp-PROXIMITY_THRESH", 0.5, {min:0, max:1}),
+      APPEARANCE_THRESH:    num("hp-APPEARANCE_THRESH", 0.25, {min:0, max:1}),
+    };
+    startAnalysis(payload);
+    popupActivo.closePopup();
+  });
+});
+
 
 
   function startRender(tareaId) {
@@ -982,6 +1042,8 @@
       success: function (data) {
         motTxt = data.motTxt;
         fps = data.fps;
+        jugadores_tracking = data.jugadores_tracking;
+        console.log('Jugadores en pista:', jugadores_tracking);
       },
       error: function (error) {
         console.error('Error al obtener datos MOT:', error);
@@ -1016,9 +1078,11 @@
 
       ctx.fillStyle = "lime";
       ctx.font = "16px Arial";
-      ctx.fillText(`ID: ${id}`, sx, sy - 5);
-
-      // Guardar box para detección de click
+      if(jugadores_tracking[id]) {
+        ctx.fillText(jugadores_tracking[id], sx, sy - 5);
+      } else {
+        ctx.fillText(`ID: ${id}`, sx, sy - 5);
+      }
       currentBoxes.push({ frame, id, x: sx, y: sy, w: sw, h: sh });
     });
 
@@ -1077,11 +1141,11 @@
   }
   intervalos_tareas = [];
   intervalos_descargas = [];
-  function startAnalysis(postprocesado) {
+  function startAnalysis(options) {
     closeTracking();
     $("#confirm-analysis").prop("disabled", true);
     $("#cancel-analysis").prop("disabled", true);
-    $.post("/video/{{ video.id }}/analisis-automatico", { postprocesado: postprocesado }, function (response) {
+    $.post("/video/{{ video.id }}/analisis-automatico", { options }, function (response) {
       if (response.success) {
         popupActivo.closePopup();
         popupActivo = new Popup(`
@@ -1382,7 +1446,7 @@
     if (Object.keys(motTxt).length > 0) {
       Object.keys(motTxt).forEach(frame => {
         motTxt[frame].forEach(box => {
-          ids.add((box.split(',')[1] || '').trim());
+          ids.add(parseInt((box.split(',')[1] || '').trim()));
         });
       });
     }
@@ -1401,9 +1465,22 @@
     }
   }
 
+  async function obtenerJugadoresAsignados(trackingId) {
+    try {
+      const res = await fetch(`/video/analisis-automatico/${trackingId}/jugadores-asignados`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      return data.jugadores_asignados ?? [];
+    } catch (err) {
+      console.error("Error en la petición de jugadores asignados:", err);
+      return [];
+    }
+  }
+
   async function assignIdsToBoxes(trackingId) {
-    const [jugadores, motIds] = await Promise.all([
+    const [jugadores, jugadoresAsignados, motIds] = await Promise.all([
       obtenerJugadores(),
+      obtenerJugadoresAsignados(trackingId),
       Promise.resolve(getMotIds())
     ]);
     let optionsJugadores = jugadores.local.map(j =>
@@ -1413,15 +1490,15 @@
       `<option value="${j.id}">VISITANTE - ${j.nombre} ${j.apellido ?? ''} (Dorsal ${j.dorsal})</option>`
     ));
     optionsJugadores = optionsJugadores.join('');
-
-    const optionsMot = motIds.map(id =>
+    const asignados = Object.values(jugadoresAsignados).flat();
+    const noAsignados = motIds.filter(id => !asignados.includes(id));
+    const optionsMot = noAsignados.map(id =>
       `<option value="${id}">${id}</option>`
     ).join('');
 
     const html = `
     <div class="w-100">
   <h5 class="mb-3">Asignar IDs de tracking MOT</h5>
-
   <div class="form-group">
     <label class="mb-1">Jugador</label>
     <select id="jugadorSelect" class="form-control">
@@ -1431,7 +1508,6 @@
   </div>
 
   <div class="row">
-    <!-- Columna izquierda: pool de MOT IDs -->
     <div class="col-md-5">
       <div class="form-group mb-2">
         <div class="d-flex justify-content-between align-items-center">
@@ -1464,17 +1540,147 @@
     <button id="guardarBtn" type="button" class="btn btn-primary">Guardar</button>
   </div>
 
-  <div id="alerta" class="alert alert-danger mt-3 mb-0 d-none" role="alert"></div>
+  <div id="alerta" class="alert alert-danger mt-3 mb-0 d-none"></div>
 </div>
   `;
 
-    const popup = new Popup(html, {
+    popupActivo = new Popup(html, {
       width: 'min(95%, 700px)',
       height: 'auto',
       backgroundColor: 'white',
       closeButton: true,
       overlay: true,
       element: document.body
+    });
+const $ = (sel) => document.querySelector(sel);
+
+function getSelectedValues(selectEl) {
+  return Array.from(selectEl.selectedOptions).map(o => Number(o.value));
+}
+
+function renderAssigned(jugadorId) {
+  const motAssigned = $('#motAssigned');
+  motAssigned.innerHTML = '';
+  const ids = jugadoresAsignados[jugadorId] ?? [];
+  ids.sort((a,b)=>a-b).forEach(id => {
+    const opt = document.createElement('option');
+    opt.value = String(id);
+    opt.textContent = String(id);
+    motAssigned.appendChild(opt);
+  });
+}
+
+function renderAvailable(motIds, jugadoresAsignadosObj, currentJugadorId, filtro = '') {
+  const usados = new Set(Object.values(jugadoresAsignadosObj).flat());
+  const motSelect = $('#motSelect');
+  motSelect.innerHTML = '';
+
+  const idsDisponibles = motIds
+    .filter(id => !usados.has(id))
+    .filter(id => String(id).includes(filtro));
+
+  idsDisponibles.sort((a,b)=>a-b).forEach(id => {
+    const opt = document.createElement('option');
+    opt.value = String(id);
+    opt.textContent = String(id);
+    motSelect.appendChild(opt);
+  });
+}
+
+function requireJugador() {
+  const jugadorId = Number($('#jugadorSelect').value);
+  if (!jugadorId) {
+    const alerta = $('#alerta');
+    alerta.textContent = 'Primero selecciona un jugador.';
+    alerta.classList.remove('d-none');
+    setTimeout(()=>alerta.classList.add('d-none'), 2000);
+    return null;
+  }
+  return jugadorId;
+}
+
+if (!jugadoresAsignados || typeof jugadoresAsignados !== 'object') {
+  window.jugadoresAsignados = {};
+}
+
+$('#jugadorSelect').addEventListener('change', (e) => {
+  const jugadorId = Number(e.target.value);
+  if (!jugadoresAsignados[jugadorId]) jugadoresAsignados[jugadorId] = [];
+  renderAssigned(jugadorId);
+  renderAvailable(motIds, jugadoresAsignados, jugadorId, $('#filtroMot').value.trim());
+});
+
+// Filtrado en tiempo real
+$('#filtroMot').addEventListener('input', (e) => {
+  const jugadorId = Number($('#jugadorSelect').value) || null;
+  renderAvailable(motIds, jugadoresAsignados, jugadorId, e.target.value.trim());
+});
+
+// ASIGNAR: izquierda -> derecha
+$('#btnAsignar').addEventListener('click', () => {
+  const jugadorId = requireJugador();
+  if (!jugadorId) return;
+
+  const seleccionados = getSelectedValues($('#motSelect'));
+  if (!seleccionados.length) return;
+
+  if (!jugadoresAsignados[jugadorId]) jugadoresAsignados[jugadorId] = [];
+
+  // Añadir evitando duplicados
+  const setActual = new Set(jugadoresAsignados[jugadorId]);
+  seleccionados.forEach(id => setActual.add(id));
+  jugadoresAsignados[jugadorId] = Array.from(setActual);
+
+  renderAssigned(jugadorId);
+  renderAvailable(motIds, jugadoresAsignados, jugadorId, $('#filtroMot').value.trim());
+});
+
+$('#btnQuitar').addEventListener('click', () => {
+  const jugadorId = requireJugador();
+  if (!jugadorId) return;
+
+  const seleccionados = getSelectedValues($('#motAssigned'));
+  if (!seleccionados.length) return;
+
+  jugadoresAsignados[jugadorId] = (jugadoresAsignados[jugadorId] || []).filter(id => !seleccionados.includes(id));
+
+  renderAssigned(jugadorId);
+  renderAvailable(motIds, jugadoresAsignados, jugadorId, $('#filtroMot').value.trim());
+});
+
+$('#guardarBtn').addEventListener('click', async () => {
+  try {
+    guardarAsignaciones(trackingId, jugadoresAsignados).then(() => {
+      popupActivo.closePopup();
+      window.location.reload();
+    });
+  } catch (e) {
+    const alerta = $('#alerta');
+    alerta.textContent = 'No se pudieron guardar los cambios.';
+    alerta.classList.remove('d-none');
+  }
+});
+
+$('#cancelarBtn').addEventListener('click', () => {
+  popup.close?.();
+});
+
+// Inicializa render (por si ya venía un jugador seleccionado)
+(() => {
+  const jugadorId = Number($('#jugadorSelect').value) || null;
+  renderAvailable(motIds, jugadoresAsignados, jugadorId);
+  if (jugadorId) renderAssigned(jugadorId);
+})();
+
+  }
+
+  async function guardarAsignaciones(trackingId, asignaciones) {
+    return fetch(`/video/analisis-automatico/${trackingId}/jugadores-asignados`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(asignaciones)
     });
   }
 

@@ -425,8 +425,7 @@ class Descarga(db.Model):
 
 class JugadorTracking(db.Model):
     __tablename__ = 'jugadores_tracking'
-
     tarea_id = db.Column(db.Integer, db.ForeignKey('tareas.id', ondelete="CASCADE"), primary_key=True)
     jugador_id = db.Column(db.Integer, db.ForeignKey('jugadores.id', ondelete="CASCADE"), primary_key=True)
-    id = db.Column(db.Integer)
+    id = db.Column(db.Integer, primary_key=True)
 

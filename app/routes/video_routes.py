@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, session, redirect, flash, render_template, send_file, abort
 import os
 from datetime import datetime
-from models import db, Video, Partido, Temporada, Jugador, Evento, TipoEvento, Convocado, Equipo, Liga, Tarea, Descarga
+from models import db, Video, Partido, Temporada, Jugador, Evento, TipoEvento, Convocado, Equipo, Liga, Tarea, Descarga, JugadorTracking, JugadorEnPista
 from sqlalchemy.sql import text
 from sqlalchemy import or_, and_
 from sqlalchemy.orm import joinedload
@@ -721,10 +721,17 @@ def ver_resultados_analisis(username, tarea_id):
         if frame_id not in indexedByFrame:
             indexedByFrame[frame_id] = []
         indexedByFrame[frame_id].append(line)
-
+    jugadores_tracking = JugadorTracking.query.filter_by(tarea_id = tarea_id).all()
+    print(jugadores_tracking)
+    jugadores_tracking_data = {}
+    for jugador in jugadores_tracking:
+        jug = Jugador.query.get(jugador.jugador_id)
+        if jug:
+            jugadores_tracking_data[int(jugador.id)] = jug.nombre
     return jsonify({
         'motTxt': indexedByFrame,
-        'fps': video.fps
+        'fps': video.fps,
+        'jugadores_tracking': jugadores_tracking_data
     })
 
 
@@ -920,3 +927,52 @@ def eliminar_render(descarga_id):
     except Exception as e:
         print(f"Error al eliminar render {descarga_id}: {e}")
         return jsonify({'error': 'Error al eliminar render'}), 500
+
+
+@video_routes.route('/video/analisis-automatico/<int:tarea_id>/jugadores-asignados', methods=['GET'])
+def obtenerJugadoresAsignados(tarea_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+    try:
+        tarea = Tarea.query.get_or_404(tarea_id)
+        if tarea.user_id != session['user_id']:
+            return jsonify({'error': 'No autorizado'}), 403
+        jugadores_asignados = JugadorTracking.query.filter_by(tarea_id=tarea.id).all()
+        jugadores = {}
+        for jugador in jugadores_asignados:
+            if jugador.jugador_id not in jugadores:
+                jugadores[jugador.jugador_id] = []
+            jugadores[jugador.jugador_id].append(jugador.id)
+        return jsonify({'success': True, 'jugadores_asignados': jugadores}), 200
+    except Exception as e:
+        print(f"Error al obtener jugadores asignados para la tarea {tarea_id}: {e}")
+        return jsonify({'error': 'Error al obtener jugadores asignados'}), 500
+
+@video_routes.route('/video/analisis-automatico/<int:tarea_id>/jugadores-asignados', methods=['POST'])
+def guardar_asignaciones(tarea_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+    try:
+        data = request.get_json()
+        JugadorTracking.query.filter_by(tarea_id=tarea_id).delete()
+        db.session.commit()
+
+        for jugador_id, tracking_ids in data.items():
+            for tracking_id in tracking_ids:
+                nuevo_tracking = JugadorTracking(jugador_id=jugador_id, tarea_id=tarea_id, id=tracking_id)
+                db.session.add(nuevo_tracking)
+        db.session.commit()
+        tarea = Tarea.query.get_or_404(tarea_id)
+        video = Video.query.get_or_404(tarea.video_id)
+        partido = video.partido_id
+        JugadorEnPista.query.filter_by(partido_id=partido).delete()
+        for jugador_id in data.keys():
+            jugador = Jugador.query.get(jugador_id)
+            jugador_en_pista = JugadorEnPista(
+                equipo_id=jugador.equipo_id, jugador_id=jugador_id, partido_id=partido)
+            db.session.add(jugador_en_pista)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Asignaciones guardadas'}), 200
+    except Exception as e:
+        print(f"Error al guardar asignaciones para la tarea {tarea_id}: {e}")
+        return jsonify({'error': 'Error al guardar asignaciones'}), 500
