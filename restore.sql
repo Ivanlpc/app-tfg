@@ -15,11 +15,11 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 
--- Volcando estructura de base de datos para gol_y_cambio_v2
-CREATE DATABASE IF NOT EXISTS `gol_y_cambio_v2` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `gol_y_cambio_v2`;
+-- Volcando estructura de base de datos para mikel
+CREATE DATABASE IF NOT EXISTS `mikel` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `mikel`;
 
--- Volcando estructura para tabla gol_y_cambio_v2.categorias
+-- Volcando estructura para tabla mikel.categorias
 CREATE TABLE IF NOT EXISTS `categorias` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nombre` varchar(50) NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `categorias` (
 
 -- La exportación de datos fue deseleccionada.
 
--- Volcando estructura para tabla gol_y_cambio_v2.categorias_evento
+-- Volcando estructura para tabla mikel.categorias_evento
 CREATE TABLE IF NOT EXISTS `categorias_evento` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nombre` varchar(100) NOT NULL,
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS `categorias_evento` (
 
 -- La exportación de datos fue deseleccionada.
 
--- Volcando estructura para tabla gol_y_cambio_v2.convocados
+-- Volcando estructura para tabla mikel.convocados
 CREATE TABLE IF NOT EXISTS `convocados` (
   `id` int NOT NULL AUTO_INCREMENT,
   `partido_id` int NOT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `convocados` (
 
 -- La exportación de datos fue deseleccionada.
 
--- Volcando estructura para tabla gol_y_cambio_v2.descargas
+-- Volcando estructura para tabla mikel.descargas
 CREATE TABLE IF NOT EXISTS `descargas` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS `descargas` (
 
 -- La exportación de datos fue deseleccionada.
 
--- Volcando estructura para tabla gol_y_cambio_v2.equipos
+-- Volcando estructura para tabla mikel.equipos
 CREATE TABLE IF NOT EXISTS `equipos` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nombre` varchar(100) NOT NULL,
@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS `equipos` (
 
 -- La exportación de datos fue deseleccionada.
 
--- Volcando estructura para tabla gol_y_cambio_v2.equipo_liga
+-- Volcando estructura para tabla mikel.equipo_liga
 CREATE TABLE IF NOT EXISTS `equipo_liga` (
   `id` int NOT NULL AUTO_INCREMENT,
   `equipo_id` int NOT NULL,
@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS `equipo_liga` (
 
 -- La exportación de datos fue deseleccionada.
 
--- Volcando estructura para tabla gol_y_cambio_v2.eventos
+-- Volcando estructura para tabla mikel.eventos
 CREATE TABLE IF NOT EXISTS `eventos` (
   `id` int NOT NULL AUTO_INCREMENT,
   `video_id` int NOT NULL,
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS `eventos` (
 
 -- La exportación de datos fue deseleccionada.
 
--- Volcando estructura para tabla gol_y_cambio_v2.eventos_seleccionados_video
+-- Volcando estructura para tabla mikel.eventos_seleccionados_video
 CREATE TABLE IF NOT EXISTS `eventos_seleccionados_video` (
   `id` int NOT NULL AUTO_INCREMENT,
   `video_id` int NOT NULL,
@@ -155,7 +155,7 @@ CREATE TABLE IF NOT EXISTS `eventos_seleccionados_video` (
 
 -- La exportación de datos fue deseleccionada.
 
--- Volcando estructura para tabla gol_y_cambio_v2.evento_personalizado
+-- Volcando estructura para tabla mikel.evento_personalizado
 CREATE TABLE IF NOT EXISTS `evento_personalizado` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
@@ -175,7 +175,7 @@ CREATE TABLE IF NOT EXISTS `evento_personalizado` (
 
 -- La exportación de datos fue deseleccionada.
 
--- Volcando estructura para tabla gol_y_cambio_v2.jugadores
+-- Volcando estructura para tabla mikel.jugadores
 CREATE TABLE IF NOT EXISTS `jugadores` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nombre` varchar(100) NOT NULL,
@@ -195,7 +195,7 @@ CREATE TABLE IF NOT EXISTS `jugadores` (
 
 -- La exportación de datos fue deseleccionada.
 
--- Volcando estructura para tabla gol_y_cambio_v2.jugadores_en_pista
+-- Volcando estructura para tabla mikel.jugadores_en_pista
 CREATE TABLE IF NOT EXISTS `jugadores_en_pista` (
   `id` int NOT NULL AUTO_INCREMENT,
   `partido_id` int NOT NULL,
@@ -212,7 +212,7 @@ CREATE TABLE IF NOT EXISTS `jugadores_en_pista` (
 
 -- La exportación de datos fue deseleccionada.
 
--- Volcando estructura para tabla gol_y_cambio_v2.liga
+-- Volcando estructura para tabla mikel.liga
 CREATE TABLE IF NOT EXISTS `liga` (
   `id` int NOT NULL AUTO_INCREMENT,
   `temporada_id` int NOT NULL,
@@ -229,7 +229,7 @@ CREATE TABLE IF NOT EXISTS `liga` (
 
 -- La exportación de datos fue deseleccionada.
 
--- Volcando estructura para tabla gol_y_cambio_v2.partidos
+-- Volcando estructura para tabla mikel.partidos
 CREATE TABLE IF NOT EXISTS `partidos` (
   `id` int NOT NULL AUTO_INCREMENT,
   `liga_id` int NOT NULL,
@@ -250,7 +250,7 @@ CREATE TABLE IF NOT EXISTS `partidos` (
 
 -- La exportación de datos fue deseleccionada.
 
--- Volcando estructura para tabla gol_y_cambio_v2.posiciones
+-- Volcando estructura para tabla mikel.posiciones
 CREATE TABLE IF NOT EXISTS `posiciones` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nombre` varchar(50) NOT NULL,
@@ -261,7 +261,7 @@ CREATE TABLE IF NOT EXISTS `posiciones` (
 
 -- La exportación de datos fue deseleccionada.
 
--- Volcando estructura para tabla gol_y_cambio_v2.tareas
+-- Volcando estructura para tabla mikel.tareas
 CREATE TABLE IF NOT EXISTS `tareas` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
@@ -279,7 +279,7 @@ CREATE TABLE IF NOT EXISTS `tareas` (
 
 -- La exportación de datos fue deseleccionada.
 
--- Volcando estructura para tabla gol_y_cambio_v2.temporada
+-- Volcando estructura para tabla mikel.temporada
 CREATE TABLE IF NOT EXISTS `temporada` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
@@ -293,7 +293,7 @@ CREATE TABLE IF NOT EXISTS `temporada` (
 
 -- La exportación de datos fue deseleccionada.
 
--- Volcando estructura para tabla gol_y_cambio_v2.tipo_evento
+-- Volcando estructura para tabla mikel.tipo_evento
 CREATE TABLE IF NOT EXISTS `tipo_evento` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nombre` varchar(50) NOT NULL,
@@ -309,7 +309,7 @@ CREATE TABLE IF NOT EXISTS `tipo_evento` (
 
 -- La exportación de datos fue deseleccionada.
 
--- Volcando estructura para tabla gol_y_cambio_v2.users
+-- Volcando estructura para tabla mikel.users
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `username` varchar(50) NOT NULL,
@@ -321,7 +321,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 
 -- La exportación de datos fue deseleccionada.
 
--- Volcando estructura para tabla gol_y_cambio_v2.videos
+-- Volcando estructura para tabla mikel.videos
 CREATE TABLE IF NOT EXISTS `videos` (
   `id` int NOT NULL AUTO_INCREMENT,
   `partido_id` int NOT NULL,
@@ -346,7 +346,7 @@ CREATE TABLE IF NOT EXISTS `jugadores_tracking` (
 
 -- La exportación de datos fue deseleccionada.
 
--- Volcando estructura para vista gol_y_cambio_v2.vista_convocados
+-- Volcando estructura para vista mikel.vista_convocados
 -- Creando tabla temporal para superar errores de dependencia de VIEW
 CREATE TABLE `vista_convocados` (
 	`jugador_id` INT(10) NOT NULL,
@@ -360,7 +360,7 @@ CREATE TABLE `vista_convocados` (
 	`tipo_equipo` VARCHAR(9) NOT NULL COLLATE 'latin1_swedish_ci'
 ) ENGINE=MyISAM;
 
--- Volcando estructura para vista gol_y_cambio_v2.v_estadisticas_jugador_partido
+-- Volcando estructura para vista mikel.v_estadisticas_jugador_partido
 -- Creando tabla temporal para superar errores de dependencia de VIEW
 CREATE TABLE `v_estadisticas_jugador_partido` (
 	`partido_id` INT(10) NOT NULL,

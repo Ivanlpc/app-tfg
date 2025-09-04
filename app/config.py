@@ -3,9 +3,9 @@ import os
 class Config:
     # Configuración de la base de datos MySQL usando variables de entorno
     MYSQL_USER = os.environ.get("MYSQL_USER", "root")
-    MYSQL_PASSWORD = os.environ.get("MYSQL_PASSWORD", "root")
-    MYSQL_HOST = os.environ.get("MYSQL_HOST", "localhost:3307")
-    MYSQL_DATABASE = os.environ.get("MYSQL_DATABASE", "gol_y_cambio_v2")
+    MYSQL_PASSWORD = os.environ.get("MYSQL_PASSWORD", "")
+    MYSQL_HOST = os.environ.get("MYSQL_HOST", "localhost:3306")
+    MYSQL_DATABASE = os.environ.get("MYSQL_DATABASE", "mikel")
     SQLALCHEMY_DATABASE_URI = (
         f"mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DATABASE}"
     )
