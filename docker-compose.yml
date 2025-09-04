@@ -9,7 +9,7 @@ services:
       - MYSQL_USER=root
       - MYSQL_PASSWORD=root
       - MYSQL_HOST=mysql
-      - MYSQL_DATABASE=gol_y_cambio_v2
+      - MYSQL_DATABASE=mikel
       - MYSQL_PORT=3306
       - MODEL_URL=http://model:5004
       - SHARED_DIR=/shared/uploads
@@ -36,7 +36,7 @@ services:
       - MYSQL_USER=root
       - MYSQL_PASSWORD=root
       - MYSQL_HOST=mysql
-      - MYSQL_DATABASE=gol_y_cambio_v2
+      - MYSQL_DATABASE=mikel
       - MYSQL_PORT=3306
       - POSTPROCESS_URL=http://postprocess:5002/postprocesado
       - SHARED_DIR=/shared/uploads
@@ -75,7 +75,7 @@ services:
       - MYSQL_USER=root
       - MYSQL_PASSWORD=root
       - MYSQL_HOST=mysql
-      - MYSQL_DATABASE=gol_y_cambio_v2
+      - MYSQL_DATABASE=mikel
       - MYSQL_PORT=3306
       - SHARED_DIR=/shared/uploads
       - USE_SPLIT=False
@@ -104,7 +104,7 @@ services:
     container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: gol_y_cambio_v2
+      MYSQL_DATABASE: mikel
     command: [
       "--character-set-server=utf8mb4",
       "--collation-server=utf8mb4_0900_ai_ci"

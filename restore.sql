@@ -16,7 +16,7 @@
 
 
 -- Volcando estructura de base de datos para mikel
-CREATE DATABASE IF NOT EXISTS `mikel` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+CREATE DATABASE IF NOT EXISTS `mikel` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 USE `mikel`;
 
 -- Volcando estructura para tabla mikel.categorias
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `categorias` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `nombre` (`nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS `categorias_evento` (
   `nombre` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `nombre` (`nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS `convocados` (
   KEY `idx_jugador_id` (`jugador_id`),
   CONSTRAINT `convocados_ibfk_1` FOREIGN KEY (`partido_id`) REFERENCES `partidos` (`id`) ON DELETE CASCADE,
   CONSTRAINT `convocados_ibfk_2` FOREIGN KEY (`jugador_id`) REFERENCES `jugadores` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `descargas` (
   KEY `fk_descargas_tarea` (`tarea_id`),
   CONSTRAINT `fk_descargas_tarea` FOREIGN KEY (`tarea_id`) REFERENCES `tareas` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_descargas_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS `equipos` (
   PRIMARY KEY (`id`),
   KEY `fk_equipos_user_id` (`user_id`),
   CONSTRAINT `fk_equipos_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS `equipo_liga` (
   KEY `equipo_liga_ibfk_liga` (`liga_id`),
   CONSTRAINT `equipo_liga_ibfk_equipo` FOREIGN KEY (`equipo_id`) REFERENCES `equipos` (`id`) ON DELETE CASCADE,
   CONSTRAINT `equipo_liga_ibfk_liga` FOREIGN KEY (`liga_id`) REFERENCES `liga` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -129,7 +129,7 @@ CREATE TABLE IF NOT EXISTS `eventos` (
   CONSTRAINT `eventos_ibfk_video` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_eventos_evento_personalizado` FOREIGN KEY (`evento_personalizado_id`) REFERENCES `evento_personalizado` (`id`) ON DELETE CASCADE,
   CONSTRAINT `ck_un_solo_tipo_evento` CHECK ((((`tipo_evento_id` is not null) and (`evento_personalizado_id` is null)) or ((`tipo_evento_id` is null) and (`evento_personalizado_id` is not null))))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS `eventos_seleccionados_video` (
   CONSTRAINT `fk_esv_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_esv_video` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`) ON DELETE CASCADE,
   CONSTRAINT `eventos_seleccionados_video_chk_1` CHECK ((((`tipo_evento_id` is not null) and (`evento_personalizado_id` is null)) or ((`tipo_evento_id` is null) and (`evento_personalizado_id` is not null))))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -171,7 +171,7 @@ CREATE TABLE IF NOT EXISTS `evento_personalizado` (
   KEY `categoria_evento_id` (`categoria_evento_id`),
   CONSTRAINT `evento_personalizado_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `evento_personalizado_ibfk_2` FOREIGN KEY (`categoria_evento_id`) REFERENCES `categorias_evento` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -191,7 +191,7 @@ CREATE TABLE IF NOT EXISTS `jugadores` (
   KEY `fk_posicion` (`posicion_id`),
   CONSTRAINT `fk_posicion` FOREIGN KEY (`posicion_id`) REFERENCES `posiciones` (`id`) ON DELETE SET NULL,
   CONSTRAINT `jugadores_ibfk_1` FOREIGN KEY (`equipo_id`) REFERENCES `equipos` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -208,7 +208,7 @@ CREATE TABLE IF NOT EXISTS `jugadores_en_pista` (
   CONSTRAINT `jugadores_en_pista_ibfk_1` FOREIGN KEY (`partido_id`) REFERENCES `partidos` (`id`) ON DELETE CASCADE,
   CONSTRAINT `jugadores_en_pista_ibfk_2` FOREIGN KEY (`jugador_id`) REFERENCES `jugadores` (`id`) ON DELETE CASCADE,
   CONSTRAINT `jugadores_en_pista_ibfk_3` FOREIGN KEY (`equipo_id`) REFERENCES `equipos` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -225,7 +225,7 @@ CREATE TABLE IF NOT EXISTS `liga` (
   KEY `liga_ibfk_categoria` (`categoria_id`),
   CONSTRAINT `liga_ibfk_categoria` FOREIGN KEY (`categoria_id`) REFERENCES `categorias` (`id`) ON DELETE RESTRICT,
   CONSTRAINT `liga_ibfk_temporada` FOREIGN KEY (`temporada_id`) REFERENCES `temporada` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -246,7 +246,7 @@ CREATE TABLE IF NOT EXISTS `partidos` (
   CONSTRAINT `partidos_ibfk_2` FOREIGN KEY (`equipo_local_id`) REFERENCES `equipos` (`id`) ON DELETE SET NULL,
   CONSTRAINT `partidos_ibfk_3` FOREIGN KEY (`equipo_visitante_id`) REFERENCES `equipos` (`id`) ON DELETE SET NULL,
   CONSTRAINT `partidos_ibfk_liga` FOREIGN KEY (`liga_id`) REFERENCES `liga` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -257,7 +257,7 @@ CREATE TABLE IF NOT EXISTS `posiciones` (
   `color` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `nombre` (`nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -275,7 +275,7 @@ CREATE TABLE IF NOT EXISTS `tareas` (
   KEY `video_id` (`video_id`),
   CONSTRAINT `tareas_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `tareas_ibfk_2` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -289,7 +289,7 @@ CREATE TABLE IF NOT EXISTS `temporada` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_user_proyecto_nombre` (`user_id`,`nombre`),
   CONSTRAINT `temporada_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -305,7 +305,7 @@ CREATE TABLE IF NOT EXISTS `tipo_evento` (
   UNIQUE KEY `uq_nombre` (`nombre`),
   KEY `fk_categoria_evento` (`categoria_evento_id`),
   CONSTRAINT `fk_categoria_evento` FOREIGN KEY (`categoria_evento_id`) REFERENCES `categorias_evento` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -317,7 +317,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -332,7 +332,7 @@ CREATE TABLE IF NOT EXISTS `videos` (
   PRIMARY KEY (`id`),
   KEY `idx_partido_id` (`partido_id`),
   CONSTRAINT `videos_ibfk_1` FOREIGN KEY (`partido_id`) REFERENCES `partidos` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE IF NOT EXISTS `jugadores_tracking` (
   `tarea_id` int NOT NULL,
@@ -342,7 +342,7 @@ CREATE TABLE IF NOT EXISTS `jugadores_tracking` (
   KEY `fk_jugador` (`jugador_id`),
   CONSTRAINT `fk_jugador` FOREIGN KEY (`jugador_id`) REFERENCES `jugadores` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_tarea` FOREIGN KEY (`tarea_id`) REFERENCES `tareas` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -350,13 +350,13 @@ CREATE TABLE IF NOT EXISTS `jugadores_tracking` (
 -- Creando tabla temporal para superar errores de dependencia de VIEW
 CREATE TABLE `vista_convocados` (
 	`jugador_id` INT(10) NOT NULL,
-	`jugador_nombre` VARCHAR(100) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
-	`jugador_apellido` VARCHAR(100) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`jugador_nombre` VARCHAR(100) NOT NULL COLLATE 'utf8mb4_general_ci',
+	`jugador_apellido` VARCHAR(100) NOT NULL COLLATE 'utf8mb4_general_ci',
 	`jugador_dorsal` INT(10) NULL,
-	`jugador_rol` ENUM('jugador','entrenador') NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`jugador_rol` ENUM('jugador','entrenador') NOT NULL COLLATE 'utf8mb4_general_ci',
 	`partido_id` INT(10) NOT NULL,
 	`equipo_id` INT(10) NOT NULL,
-	`equipo_nombre` VARCHAR(100) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`equipo_nombre` VARCHAR(100) NOT NULL COLLATE 'utf8mb4_general_ci',
 	`tipo_equipo` VARCHAR(9) NOT NULL COLLATE 'latin1_swedish_ci'
 ) ENGINE=MyISAM;
 
@@ -365,11 +365,11 @@ CREATE TABLE `vista_convocados` (
 CREATE TABLE `v_estadisticas_jugador_partido` (
 	`partido_id` INT(10) NOT NULL,
 	`fecha_partido` DATETIME NOT NULL,
-	`equipo_local` VARCHAR(100) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
-	`equipo_visitante` VARCHAR(100) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`equipo_local` VARCHAR(100) NOT NULL COLLATE 'utf8mb4_general_ci',
+	`equipo_visitante` VARCHAR(100) NOT NULL COLLATE 'utf8mb4_general_ci',
 	`jugador_id` INT(10) NOT NULL,
-	`jugador` VARCHAR(216) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
-	`equipo_jugador` VARCHAR(100) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`jugador` VARCHAR(216) NOT NULL COLLATE 'utf8mb4_general_ci',
+	`equipo_jugador` VARCHAR(100) NOT NULL COLLATE 'utf8mb4_general_ci',
 	`tiros_campo` VARCHAR(49) NULL COLLATE 'latin1_swedish_ci',
 	`tiros_7m` VARCHAR(49) NULL COLLATE 'latin1_swedish_ci',
 	`perdidas` DECIMAL(23,0) NULL,
