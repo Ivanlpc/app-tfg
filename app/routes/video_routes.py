@@ -968,16 +968,6 @@ def guardar_asignaciones(tarea_id):
                 nuevo_tracking = JugadorTracking(jugador_id=jugador_id, tarea_id=tarea_id, id=tracking_id)
                 db.session.add(nuevo_tracking)
         db.session.commit()
-        tarea = Tarea.query.get_or_404(tarea_id)
-        video = Video.query.get_or_404(tarea.video_id)
-        partido = video.partido_id
-        JugadorEnPista.query.filter_by(partido_id=partido).delete()
-        for jugador_id in data.keys():
-            jugador = Jugador.query.get(jugador_id)
-            jugador_en_pista = JugadorEnPista(
-                equipo_id=jugador.equipo_id, jugador_id=jugador_id, partido_id=partido)
-            db.session.add(jugador_en_pista)
-        db.session.commit()
         return jsonify({'success': True, 'message': 'Asignaciones guardadas'}), 200
     except Exception as e:
         print(f"Error al guardar asignaciones para la tarea {tarea_id}: {e}")

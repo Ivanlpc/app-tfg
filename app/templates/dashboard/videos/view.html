@@ -466,7 +466,7 @@
                     </div>
                     {% else %}
                     <button class="btn btn-info btn-sm" disabled onclick="() => {}">
-                      <i class="fas fa-download"></i> Renderizando
+                      <i class="fas fa-download"></i> Procesando
                     </button>
                     <script>
                       document.addEventListener('DOMContentLoaded', function () {
@@ -482,7 +482,7 @@
 
                     {% else %}
                     <button class="btn btn-secondary btn-sm" onclick="startRender('{{ tarea.id }}')">
-                      <i class="fas fa-download"></i> Renderizar
+                      <i class="fas fa-download"></i> Procesar
                     </button>
                     {% endif %}
                   </div>
@@ -1012,8 +1012,8 @@ button.addEventListener("click", function () {
   function startRender(tareaId) {
     html = `
     <div class="popup-content">
-      <h2>Iniciar renderizado</h2>
-      <p>¿Quieres iniciar el renderizado de este vídeo?</p>
+      <h2>Iniciar procesamiento</h2>
+      <p>¿Quieres iniciar el procesamiento para descargar este vídeo?</p>
       <p>Este proceso puede tardar un tiempo dependiendo de la duración del vídeo.</p>
       <form id="render-form" onsubmit="return false;">
         <input type="checkbox" id="confirm-checkbox">
@@ -1053,7 +1053,7 @@ button.addEventListener("click", function () {
         });
       },
       error: function (error) {
-        console.error('Error al iniciar renderizado:', error);
+        console.error('Error al iniciar procesamiento:', error);
       }
     });
   }
@@ -1812,7 +1812,7 @@ $('#cancelarBtn').addEventListener('click', () => {
                       <i class="fas fa-eye"></i> Ver resultados
                     </button>
                     <button class="btn btn-info btn-sm" disabled onclick="() => {}">
-                      ${data.progreso}% Renderizando
+                      ${data.progreso}% Procesando
                     </button>
                     </div>
               `;
@@ -1825,7 +1825,7 @@ $('#cancelarBtn').addEventListener('click', () => {
                     </button>
                     <div class="d-flex justify-content-start">
                       <button class="btn btn-danger btn-sm" disabled onclick="() => {}">
-                      <i class="fas fa-download"></i> Error al renderizar
+                      <i class="fas fa-download"></i> Error al procesar
                     </button>
 
                       <button type="button" class="btn btn-danger btn-sm dropdown-toggle dropdown-toggle-split rounded-0"
@@ -1912,7 +1912,7 @@ $('#cancelarBtn').addEventListener('click', () => {
                       <i class="fas fa-eye"></i> Ver resultados
                     </button>
                     <button class="btn btn-secondary btn-sm" onclick="startRender('${tareaId}')">
-                      <i class="fas fa-download"></i> Renderizar
+                      <i class="fas fa-download"></i> Procesar
                     </button>
                     </div>
               `;
@@ -1965,7 +1965,7 @@ $('#cancelarBtn').addEventListener('click', () => {
         html = `
       <div class="popup-content">
         <h2>La descarga ha sido eliminada</h2>
-        <p>Tendrás que volver a renderizar el vídeo para poder descargarlo de nuevo.</p>
+        <p>Tendrás que volver a procesar el vídeo para poder descargarlo de nuevo.</p>
       </div>
     `;
         popupActivo = new Popup(html, {
@@ -1986,7 +1986,7 @@ $('#cancelarBtn').addEventListener('click', () => {
                       <i class="fas fa-eye"></i> Ver resultados
                     </button>
                     <button class="btn btn-secondary btn-sm" onclick="startRender('${taskid}')">
-                      <i class="fas fa-download"></i> Renderizar
+                      <i class="fas fa-download"></i> Procesar
                     </button>
                     </div>
             `;
@@ -2007,7 +2007,7 @@ $('#cancelarBtn').addEventListener('click', () => {
     html = `
       <div class="popup-content">
         <h2>¿Eliminar descarga?</h2>
-        <p>Tendrás que volver a renderizar el vídeo para poder descargarlo</p>
+        <p>Tendrás que volver a procesar el vídeo para poder descargarlo</p>
         <button id="confirm-delete" class="btn btn-danger" onclick="confirmDeleteRender('${renderid}', '${taskid}')">Eliminar</button>
         <button id="cancel-delete" class="btn btn-secondary" onclick="popupActivo.closePopup()">Cancelar</button>
       </div>
