@@ -334,6 +334,16 @@ CREATE TABLE IF NOT EXISTS `videos` (
   CONSTRAINT `videos_ibfk_1` FOREIGN KEY (`partido_id`) REFERENCES `partidos` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+CREATE TABLE IF NOT EXISTS `jugadores_tracking` (
+  `tarea_id` int NOT NULL,
+  `jugador_id` int NOT NULL,
+  `id` int NOT NULL,
+  PRIMARY KEY (`tarea_id`,`jugador_id`,`id`),
+  KEY `fk_jugador` (`jugador_id`),
+  CONSTRAINT `fk_jugador` FOREIGN KEY (`jugador_id`) REFERENCES `jugadores` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_tarea` FOREIGN KEY (`tarea_id`) REFERENCES `tareas` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 -- La exportación de datos fue deseleccionada.
 
 -- Volcando estructura para vista gol_y_cambio_v2.vista_convocados
