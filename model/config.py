@@ -3,10 +3,10 @@ import os
 class Config:
     # Configuración de la base de datos MySQL usando variables de entorno
     MYSQL_USER = os.environ.get("MYSQL_USER", "root")
-    MYSQL_PASSWORD = os.environ.get("MYSQL_PASSWORD", "root")
+    MYSQL_PASSWORD = os.environ.get("MYSQL_PASSWORD", "")
     MYSQL_HOST = os.environ.get("MYSQL_HOST", "localhost")
     MYSQL_DATABASE = os.environ.get("MYSQL_DATABASE", "mikel")
-    MYSQL_PORT = os.environ.get("MYSQL_PORT", 3307)
+    MYSQL_PORT = os.environ.get("MYSQL_PORT", 3306)
     # Carpeta de subidas (apunta a la carpeta compartida por Docker)
     UPLOAD_FOLDER = os.environ.get("SHARED_DIR", os.path.abspath("../app/Almacenamiento/uploads"))
     POSTPROCESS_URL = os.environ.get("POSTPROCESS_URL", "http://localhost:5002/postprocesado")

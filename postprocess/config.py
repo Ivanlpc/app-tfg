@@ -6,7 +6,7 @@ class Config:
     MYSQL_PASSWORD = os.environ.get("MYSQL_PASSWORD", "root")
     MYSQL_HOST = os.environ.get("MYSQL_HOST", "localhost")
     MYSQL_DATABASE = os.environ.get("MYSQL_DATABASE", "mikel")
-    MYSQL_PORT = os.environ.get("MYSQL_PORT", 3307)
+    MYSQL_PORT = os.environ.get("MYSQL_PORT", 3306)
     # Carpeta de subidas (apunta a la carpeta compartida por Docker)
     UPLOAD_FOLDER = os.environ.get("SHARED_DIR", os.path.abspath("../app/Almacenamiento/uploads"))
     USE_SPLIT = os.environ.get("USE_SPLIT", False)
