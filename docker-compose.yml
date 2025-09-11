@@ -110,7 +110,7 @@ services:
       "--collation-server=utf8mb4_0900_ai_ci"
     ]
     ports:
-      - "3307:3306"
+      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./restore.sql:/docker-entrypoint-initdb.d/restore.sql:ro
