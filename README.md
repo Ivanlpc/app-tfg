@@ -1,3 +1,8 @@
+# Estructura de carpetas
+- **App**: Contiene la aplicación web con la arquitectura MVC
+- **model**: Contiene el modelo Deep-EIoU, recibe los parámetros mediante una api en Flask
+- **postprocess**: Contiene el algoritmo GTA, recibe los parámetros mediante una api en Flask
+
 # Manual de instalación y ejecución
 
 ## Requisitos previos
@@ -143,4 +148,11 @@ Finalmente, una vez instaladas las dependencias y configurada la base de datos, 
 
 ```bash
 python app.py
+```
+
+## Otra forma de ejecución (opcinal)
+Si queremos ejecutar el proyecto sin realizar todos los pasos anteriores, podemos simplemente abrir una terminal con docker instalado y ejecutar el siguiente comando en la raíz del proyecto:
+
+```bash
+docker-compose up -d --build
 ```
